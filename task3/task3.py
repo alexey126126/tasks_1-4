@@ -22,30 +22,32 @@ def read_json_file(file_name):
     return [Segment(data["begin"], data["end"]) for data in segment_data]
 
 
-arr_segment = read_json_file("input.json")
-
-
 def segment_union(segments):
     max_length = 0
-    tmp_len = 0
-    max_sum_segment = []
+    res_segments = []
     segments = sorted(segments, key=lambda segment: segment.begin)
+
     for i in range(len(segments) - 2):
         for j in range(i + 1, len(segments) - 1):
+            if segments[i].end >= segments[j].begin:
+                continue
             for k in range(j + 1, len(segments)):
-                if (segments[i].end < segments[j].begin) and (segments[j].end < segments[k].begin):
-                    tmp_len = segments[i].length_segment + segments[j].length_segment + segments[k].length_segment
-                    if tmp_len > max_length:
-                        max_length = tmp_len
-                        max_sum_segment.clear()
-                        max_sum_segment.append(segments[i])
-                        max_sum_segment.append(segments[j])
-                        max_sum_segment.append(segments[k])
-    return max_sum_segment
+                if segments[j].end >= segments[k].begin:
+                    continue
+                tmp_len = segments[i].length_segment() + segments[j].length_segment() + segments[k].length_segment()
+                if max_length < tmp_len:
+                    max_length = tmp_len
+                    res_segments = [segments[i], segments[j], segments[k]]
+    return res_segments, max_length
 
 
-write_json_file("output1.json", segment_union(arr_segment))
+segments = read_json_file("input.json")
 
+print('\n'.join([str(i.__dict__) for i in sorted(segments, key=lambda segment: segment.begin)]))
 
-print('\n'.join(
-    [str(i.__dict__) for i in segment_union(arr_segment)]))
+res, max_len = segment_union(segments)
+
+print('res:')
+print('max_len:', max_len)
+
+print('\n'.join([str(i.__dict__) for i in res]))
